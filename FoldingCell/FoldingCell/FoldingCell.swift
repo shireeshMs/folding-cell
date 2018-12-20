@@ -26,6 +26,39 @@ import UIKit
 /// UITableViewCell with folding animation
 open class FoldingCell: UITableViewCell {
     
+    @IBOutlet open var priorityVW: UIView!
+    @IBOutlet open var callMeBtn: UIButton!
+    @IBOutlet open var Details: UIButton!
+    @IBOutlet open var statusButton: UIButton!
+    @IBOutlet open var refIDstr: UILabel!
+    @IBOutlet open var insuranceVw: UIView!
+    @IBOutlet open var objInsurancesLbl: UILabel!
+    @IBOutlet open var unfoldPrefTimeLbl: UILabel!
+    @IBOutlet open var unFoldFromAddressLbl: UILabel!
+    @IBOutlet open var unFoldToAddressLbl: UILabel!
+    
+    @IBOutlet open var senderImgOutlet: UIImageView!
+    @IBOutlet open var npiIndicator: UIImageView!
+    @IBOutlet open var unfoldSenderLbl: UILabel!
+    @IBOutlet open var DiagLabel: UILabel!
+    @IBOutlet open var objDiagNosisCodeLbl: UILabel!
+    @IBOutlet open var objContactNum: UILabel!
+    @IBOutlet open var objNotesLbl: UILabel!
+    @IBOutlet open var objRecievedSentLbl: UILabel!
+    @IBOutlet open var RecievedSentLbl: UILabel!
+    @IBOutlet open var urgentImgOutelt: UIImageView!
+    @IBOutlet open var AssignMeVW: UIView!
+    @IBOutlet open var AssignMeBtn: UIButton!
+    @IBOutlet open var unFoldPriorityStatusLbl: UILabel!
+    @IBOutlet open var unFoldPriorityCircleLbl: UILabel!
+    @IBOutlet open var unFoldDobLbl: UILabel!
+    @IBOutlet open var unFoldPatientName: UILabel!
+    @IBOutlet open var foldVisitNoteLbl: UILabel!
+    @IBOutlet open var foldCommentLbl: UILabel!
+    @IBOutlet open var attachMentLbl: UILabel!
+    @IBOutlet open var toAddrLbl: UILabel!
+    @IBOutlet open var fromAddrLbl: UILabel!
+    @IBOutlet open var foldPreferredLbl: UILabel!
     /// UIView is displayed when cell open
     @IBOutlet open var containerView: UIView!
     @IBOutlet open var containerViewTop: NSLayoutConstraint!
@@ -39,7 +72,7 @@ open class FoldingCell: UITableViewCell {
     @IBInspectable open var itemCount: NSInteger = 2
     
     /// The color of the back cell
-    @IBInspectable open var backViewColor: UIColor = UIColor.brown
+    @IBInspectable open var backViewColor: UIColor = UIColor.lightGray
     
     var animationItemViews: [RotatedView]?
     
@@ -49,7 +82,7 @@ open class FoldingCell: UITableViewCell {
      - Open:  Open direction
      - Close: Close direction
      */
-    @objc public enum AnimationType : Int {
+    public enum AnimationType {
         case open
         case close
     }
@@ -65,7 +98,7 @@ open class FoldingCell: UITableViewCell {
     /**
      Call this method in methods init(style: UITableViewCellStyle, reuseIdentifier: String?) after creating Views
      */
-    @objc open func commonInit() {
+    open func commonInit() {
         configureDefaultState()
         
         selectionStyle = .none
@@ -93,7 +126,7 @@ open class FoldingCell: UITableViewCell {
         foregroundView.layer.transform = foregroundView.transform3d()
         
         createAnimationView()
-        contentView.bringSubviewToFront(foregroundView)
+        contentView.bringSubview(toFront: foregroundView)
     }
     
     func createAnimationItemView() -> [RotatedView] {
@@ -121,12 +154,10 @@ open class FoldingCell: UITableViewCell {
         
         if animationType == .open {
             animationView?.subviews
-                .lazy
                 .compactMap { $0 as? RotatedView }
                 .forEach { $0.alpha = 0 }
         } else {
             animationView?.subviews
-                .lazy
                 .compactMap { $0 as? RotatedView }
                 .forEach {
                     if animationType == .open {
@@ -276,14 +307,15 @@ open class FoldingCell: UITableViewCell {
     }
     
     @objc open func isAnimating() -> Bool {
+        
         return animationView?.alpha == 1 ? true : false
     }
     
-    @objc open var isUnfolded = false
+    open var isUnfolded = false
     
     // MARK: Animations
     
-    @objc open func animationDuration(_ itemIndex: NSInteger, type: AnimationType) -> TimeInterval {
+    open func animationDuration(_ itemIndex: NSInteger, type: AnimationType) -> TimeInterval {
         return type == .close ? durationsForCollapsedState[itemIndex] : durationsForExpandedState[itemIndex]
     }
     
@@ -300,7 +332,7 @@ open class FoldingCell: UITableViewCell {
         return durations
     }
     
-    func openAnimation(_ completion: (() -> Void)?) {
+    public func openAnimation(_ completion: (() -> Void)?) {
         isUnfolded = true
         removeImageItemsFromAnimationView()
         addImageItemsToAnimationView()
@@ -311,7 +343,7 @@ open class FoldingCell: UITableViewCell {
         let durations = durationSequence(.open)
         
         var delay: TimeInterval = 0
-        var timing = convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeIn)
+        var timing = kCAMediaTimingFunctionEaseIn
         var from: CGFloat = 0.0
         var to: CGFloat = -CGFloat.pi / 2
         var hidden = true
@@ -328,7 +360,7 @@ open class FoldingCell: UITableViewCell {
             
             from = from == 0.0 ? CGFloat.pi / 2 : 0.0
             to = to == 0.0 ? -CGFloat.pi / 2 : 0.0
-            timing = timing == convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeIn) ? convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeOut) : convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeIn)
+            timing = timing == kCAMediaTimingFunctionEaseIn ? kCAMediaTimingFunctionEaseOut : kCAMediaTimingFunctionEaseIn
             hidden = !hidden
             delay += durations[index]
         }
@@ -347,7 +379,7 @@ open class FoldingCell: UITableViewCell {
         }
     }
     
-    func closeAnimation(_ completion: (() -> Void)?) {
+    public func closeAnimation(_ completion: (() -> Void)?) {
         isUnfolded = false
         removeImageItemsFromAnimationView()
         addImageItemsToAnimationView()
@@ -362,7 +394,7 @@ open class FoldingCell: UITableViewCell {
         var durations: [TimeInterval] = durationSequence(.close).reversed()
         
         var delay: TimeInterval = 0
-        var timing = convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeIn)
+        var timing = kCAMediaTimingFunctionEaseIn
         var from: CGFloat = 0.0
         var to: CGFloat = CGFloat.pi / 2
         var hidden = true
@@ -378,7 +410,7 @@ open class FoldingCell: UITableViewCell {
             
             to = to == 0.0 ? CGFloat.pi / 2 : 0.0
             from = from == 0.0 ? -CGFloat.pi / 2 : 0.0
-            timing = timing == convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeIn) ? convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeOut) : convertFromCAMediaTimingFunctionName(CAMediaTimingFunctionName.easeIn)
+            timing = timing == kCAMediaTimingFunctionEaseIn ? kCAMediaTimingFunctionEaseOut : kCAMediaTimingFunctionEaseIn
             hidden = !hidden
             delay += durations[index]
         }
@@ -456,12 +488,12 @@ extension RotatedView: CAAnimationDelegate {
     func foldingAnimation(_ timing: String, from: CGFloat, to: CGFloat, duration: TimeInterval, delay: TimeInterval, hidden: Bool) {
         
         let rotateAnimation = CABasicAnimation(keyPath: Const.transformRotationX)
-        rotateAnimation.timingFunction = CAMediaTimingFunction(name: convertToCAMediaTimingFunctionName(timing))
+        rotateAnimation.timingFunction = CAMediaTimingFunction(name: timing)
         rotateAnimation.fromValue = from
         rotateAnimation.toValue = to
         rotateAnimation.duration = duration
         rotateAnimation.delegate = self
-        rotateAnimation.fillMode = CAMediaTimingFillMode.forwards
+        rotateAnimation.fillMode = kCAFillModeForwards
         rotateAnimation.isRemovedOnCompletion = false
         rotateAnimation.beginTime = CACurrentMediaTime() + delay
         
@@ -502,12 +534,3 @@ private extension UIView {
     }
 }
 
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertFromCAMediaTimingFunctionName(_ input: CAMediaTimingFunctionName) -> String {
-	return input.rawValue
-}
-
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertToCAMediaTimingFunctionName(_ input: String) -> CAMediaTimingFunctionName {
-	return CAMediaTimingFunctionName(rawValue: input)
-}
